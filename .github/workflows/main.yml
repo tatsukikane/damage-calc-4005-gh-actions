@@ -19,6 +19,18 @@ jobs:
       with:
         node-version: '14.15.4'
     
-    #yarnインストールとテストを実行
+    #yarnインストール
     - run: yarn install
-    - run: yarn test
+    #jest-junitのインストール
+    - name: Install JUnit coverage reporter
+      run: yarn add --dev jest-junit
+    #テストの設定と実行
+    - name: Run tests with JUnit as reporter
+      run: npx jest --ci --runInBand --reporters=default --reporters=jest-junit
+      env: #出力形式の指定
+        JEST_JUNIT_OUTPUT_DIR: "./junit/test-results.xml"
+    #結果をアップロードする
+    - uses: actions/upload-artifact@v2
+      with: #保存場所の指定
+        path: ./junit/test-results.xml
+      if: always() #テストが落ちた時も上記を実行する
